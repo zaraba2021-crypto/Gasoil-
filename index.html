@@ -429,7 +429,7 @@ function renderArchives(){
             <div class="archive-details" id="arch-${index}">
                 <div><b>Initial:</b> ${arch.initial.toFixed(2)} DH</div>
                 <div><b>Restant:</b> ${arch.balance.toFixed(2)} DH</div>
-                <div><b>Jours totaux:</b> ${arch.totalDays}</div>
+                <div><b>Jours travaillés:</b> ${arch.history.length} jours</div>
                 <hr style="border:0; border-top:1px solid #e2e8f0; margin:8px 0;">
                 <b>Détails des jours:</b>
                 <ul>${histHtml}</ul>
@@ -447,4 +447,5 @@ setDefaultDate();
 update();
 </script>
 </body>
-</html>
+    </html>
+    
