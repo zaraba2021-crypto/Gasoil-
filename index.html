@@ -108,6 +108,411 @@ transition:background 0.2s;
 button:hover{
 background:#1d4ed8;
 }
+.btn-secondary{
+background:#64748b;
+margin-top:12px;
+}
+.btn-secondary:hover{
+background:#475569;
+}
+.stat-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:8px 0;
+border-bottom:1px solid #f1f5f9;
+}
+.stat-row:last-of-type{
+border-bottom:0;
+}
+.stat-label{
+color:#64748b;
+font-size:14px;
+}
+.stat-value{
+font-weight:600;
+color:#0f172a;
+font-size:15px;
+}
+.green-val{
+color:#16a34a !important;
+font-weight:700;
+}
+.red-val{
+color:#dc2626 !important;
+font-weight:700;
+}
+li{
+list-style:none;
+padding:12px 0;
+border-bottom:1px solid #f1f5f9;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+li:last-child{
+border-bottom:0;
+}
+.hist-info{
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+.hist-title{
+font-size:14px;
+font-weight:600;
+color:#334155;
+}
+.hist-right{
+display:flex;
+align-items:center;
+gap:12px;
+}
+.hist-amount{
+font-weight:700;
+color:#0f172a;
+font-size:15px;
+}
+.btn-edit{
+background:none;
+border:0;
+color:#f97316;
+cursor:pointer;
+font-size:16px;
+padding:4px 8px;
+width:auto;
+margin:0;
+border-radius:6px;
+}
+.btn-edit:hover{
+background:#fff7ed;
+}
+.small{
+font-size:12px;
+color:#94a3b8;
+}
+#history{
+margin:0;
+padding:0;
+}
+.archive-item{
+padding:10px 0;
+border-bottom:1px solid #f1f5f9;
+cursor:pointer;
+}
+.archive-item:last-child{
+border-bottom:0;
+}
+.archive-header{
+display:flex;
+justify-content:space-between;
+font-weight:600;
+color:#334155;
+font-size:14px;
+}
+.archive-details{
+display:none;
+background:#f8fafc;
+padding:10px;
+border-radius:8px;
+margin-top:8px;
+font-size:13px;
+color:#475569;
+}
+.archive-details ul{
+margin:8px 0 0 0;
+padding:0;
+}
+.archive-details li{
+padding:6px 0;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header-wrapper">
+<h1>⛽ Gasoil</h1>
+<button class="btn-config" onclick="toggleConfig()">⚙️</button>
+</div>
+<div class="subtitle">Gestion quotidienne des dépenses</div>
+<div class="card config-card" id="configCard">
+<h2>Configuration du mois</h2>
+<input id="initial" type="number" placeholder="Montant initial (DH)">
+<input id="days" type="number" placeholder="Nombre de jours">
+<button onclick="startMonth()">Démarrer le mois</button>
+</div>
+<div class="card">
+<h2>Situation</h2>
+<div class="stat-row">
+<span class="stat-label">Restant / Initial</span>
+<span class="stat-value" id="budgetSplit">0.00 / 0.00 DH</span>
+</div>
+<div class="stat-row">
+<span class="stat-label">Jours (Restants / Total)</span>
+<span class="stat-value" id="daysSplit">0 / 0 jours</span>
+</div>
+<div class="stat-row">
+<span class="stat-label">Total dépensé</span>
+<span class="stat-value" id="spent">0.00 DH</span>
+</div>
+<div class="stat-row">
+<span class="stat-label">Dépense moyenne (prévue)</span>
+<span class="stat-value" id="average">0.00 DH</span>
+</div>
+<div class="stat-row">
+<span class="stat-label">Dépense autorisée / jour</span>
+<span class="stat-value" id="daily">0.00 DH</span>
+</div>
+<button class="btn-secondary" onclick="closeMonth()">Clôturer le mois</button>
+</div>
+<div class="card">
+<h2>Dépense du jour</h2>
+<input id="expense" type="number" placeholder="Montant dépensé">
+<button onclick="addExpense()">Ajouter aujourd'hui</button>
+</div>
+<div class="card">
+<h2>Historique</h2>
+<ul id="history"></ul>
+</div>
+<div class="card">
+<h2>Archives des mois</h2>
+<div id="archivesList"></div>
+</div>
+</div>
+<script>
+if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js");
+}
+
+let data = JSON.parse(localStorage.getItem("gasoilData")) || {
+    initial: 0,
+    balance: 0,
+    days: 0,
+    totalDays: 0,
+    history: []
+};
+let archives = JSON.parse(localStorage.getItem("gasoilArchives")) || [];
+
+function save(){
+    localStorage.setItem("gasoilData", JSON.stringify(data));
+    localStorage.setItem("gasoilArchives", JSON.stringify(archives));
+}
+function toggleConfig(){
+    let card = document.getElementById("configCard");
+    card.style.display = card.style.display === "block" ? "none" : "block";
+}
+function update(){
+    let spent = data.initial - data.balance;
+    document.getElementById("budgetSplit").innerHTML = data.balance.toFixed(2) + " / " + data.initial.toFixed(2) + " DH";
+    document.getElementById("daysSplit").innerHTML = data.days + " / " + data.totalDays + " jours";
+    document.getElementById("spent").innerHTML = spent.toFixed(2) + " DH";
+    let average = data.totalDays > 0 ? data.initial / data.totalDays : 0;
+    document.getElementById("average").innerHTML = average.toFixed(2) + " DH";
+    let daily = data.days > 0 ? data.balance / data.days : 0;
+    document.getElementById("daily").innerHTML = daily.toFixed(2) + " DH";
+    let dailyVal = document.getElementById("daily");
+    if(daily < average){
+        dailyVal.className = "stat-value red-val";
+    } else {
+        dailyVal.className = "stat-value green-val";
+    }
+    let html = "";
+    data.history.forEach((item, index) => {
+        html += `
+        <li>
+        <div class="hist-info">
+        <span class="hist-title">Jour ${index + 1}</span>
+        <span class="small">${item.date}</span>
+        </div>
+        <div class="hist-right">
+        <span class="hist-amount">${item.amount.toFixed(2)} DH</span>
+        <button class="btn-edit" onclick="editDay(${index})">✏️</button>
+        </div>
+        </li>
+        `;
+    });
+    document.getElementById("history").innerHTML = html;
+    renderArchives();
+}
+function startMonth(){
+    let initial = Number(document.getElementById("initial").value);
+    let days = Number(document.getElementById("days").value);
+    if(initial <= 0 || days <= 0){
+        alert("Veuillez remplir les informations");
+        return;
+    }
+    data.initial = initial;
+    data.balance = initial;
+    data.days = days;
+    data.totalDays = days;
+    data.history = [];
+    save();
+    update();
+    document.getElementById("initial").value = "";
+    document.getElementById("days").value = "";
+    document.getElementById("configCard").style.display = "none";
+}
+function addExpense(){
+    let expense = Number(document.getElementById("expense").value);
+    if(expense <= 0) return;
+    if(data.days <= 0){
+        alert("Le mois est terminé ou non configuré");
+        return;
+    }
+    data.balance -= expense;
+    data.days--;
+    data.history.push({
+        amount: expense,
+        date: new Date().toLocaleDateString("fr-FR")
+    });
+    save();
+    update();
+    document.getElementById("expense").value = "";
+}
+function editDay(index){
+    let item = data.history[index];
+    let value = prompt(`Modifier le montant du Jour ${index + 1}:`, item.amount);
+    if(value !== null && value !== "" && !isNaN(value)){
+        let newAmount = Number(value);
+        data.balance += item.amount;
+        data.balance -= newAmount;
+        item.amount = newAmount;
+        save();
+        update();
+    }
+}
+function closeMonth(){
+    if(data.initial === 0){
+        alert("Aucun mois actif à clôturer.");
+        return;
+    }
+    let monthName = prompt("Entrez le nom du mois (ex: Juillet 2026):");
+    if(!monthName) return;
+    let spent = data.initial - data.balance;
+    let archiveMois = {
+        name: monthName,
+        initial: data.initial,
+        balance: data.balance,
+        spent: spent,
+        totalDays: data.totalDays,
+        history: [...data.history]
+    };
+    archives.push(archiveMois);
+    data = { initial: 0, balance: 0, days: 0, totalDays: 0, history: [] };
+    save();
+    update();
+}
+function renderArchives(){
+    let html = "";
+    if(archives.length === 0){
+        html = "<div class='small' style='text-align:center;'>Aucun mois archivé</div>";
+    }
+    archives.forEach((arch, index) => {
+        let histHtml = "";
+        arch.history.forEach((h, i) => {
+            histHtml += `<li>Jour ${i+1} (${h.date}): <b>${h.amount.toFixed(2)} DH</b></li>`;
+        });
+        html += `
+        <div class="archive-item">
+            <div class="archive-header" onclick="toggleArchiveDetails(${index})">
+                <span>📁 ${arch.name}</span>
+                <span>${arch.spent.toFixed(2)} DH</span>
+            </div>
+            <div class="archive-details" id="arch-${index}">
+                <div><b>Initial:</b> ${arch.initial.toFixed(2)} DH</div>
+                <div><b>Restant:</b> ${arch.balance.toFixed(2)} DH</div>
+                <div><b>Jours totaux:</b> ${arch.totalDays}</div>
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:8px 0;">
+                <b>Détails des jours:</b>
+                <ul>${histHtml}</ul>
+            </div>
+        </div>
+        `;
+    });
+    document.getElementById("archivesList").innerHTML = html;
+}
+function toggleArchiveDetails(index){
+    let el = document.getElementById("arch-" + index);
+    el.style.display = el.style.display === "block" ? "none" : "block";
+}
+update();
+</script>
+</body>
+</html>
+text-align:center;
+padding-left:32px;
+}
+.btn-config{
+background:none;
+border:0;
+font-size:22px;
+cursor:pointer;
+padding:4px;
+border-radius:8px;
+transition:background 0.2s;
+}
+.btn-config:hover{
+background:#e2e8f0;
+}
+.subtitle{
+text-align:center;
+color:#64748b;
+margin-bottom:24px;
+font-size:14px;
+}
+.card{
+background:white;
+padding:20px;
+border-radius:16px;
+margin-bottom:16px;
+border:1px solid #e2e8f0;
+}
+.config-card{
+display:none;
+animation:fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+from { opacity:0; transform:translateY(-10px); }
+to { opacity:1; transform:translateY(0); }
+}
+h2{
+font-size:16px;
+font-weight:700;
+color:#0f172a;
+margin-top:0;
+margin-bottom:16px;
+text-transform:uppercase;
+letter-spacing:0.5px;
+}
+input{
+width:100%;
+padding:12px 14px;
+margin:8px 0 12px 0;
+border-radius:10px;
+border:1px solid #cbd5e1;
+font-size:15px;
+color:#1e293b;
+outline:none;
+transition:border-color 0.2s;
+}
+input:focus{
+border-color:#2563eb;
+}
+button{
+width:100%;
+padding:13px;
+border:0;
+border-radius:10px;
+background:#2563eb;
+color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:background 0.2s;
+}
+button:hover{
+background:#1d4ed8;
+}
 .stat-row{
 display:flex;
 justify-content:space-between;
