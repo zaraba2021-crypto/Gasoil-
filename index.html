@@ -379,15 +379,20 @@ function addExpense(){
 }
 function editDay(index){
     let item = data.history[index];
-    let value = prompt(`Modifier le montant du Jour ${index + 1}:`, item.amount);
-    if(value !== null && value !== "" && !isNaN(value)){
-        let newAmount = Number(value);
-        data.balance += item.amount;
-        data.balance -= newAmount;
-        item.amount = newAmount;
-        save();
-        update();
-    }
+    let newAmountVal = prompt(`Modifier le montant du Jour ${index + 1}:`, item.amount);
+    if(newAmountVal === null || newAmountVal === "" || isNaN(newAmountVal)) return;
+    
+    let newDateVal = prompt(`Modifier le date (JJ/MM/AAAA):`, item.date);
+    if(newDateVal === null || newDateVal === "") return;
+
+    let newAmount = Number(newAmountVal);
+    data.balance += item.amount;
+    data.balance -= newAmount;
+    item.amount = newAmount;
+    item.date = newDateVal;
+    
+    save();
+    update();
 }
 function closeMonth(){
     if(data.initial === 0){
@@ -447,5 +452,5 @@ setDefaultDate();
 update();
 </script>
 </body>
-    </html>
-    
+                                                     </html>
+                                                     
