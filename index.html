@@ -142,12 +142,10 @@ header{
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--blue);color:#fff}
 .btn-primary:hover{background:#1d4ed8;box-shadow:0 2px 8px rgba(37,99,235,.35)}
+.btn-full{width:100%}
 .btn-sm{padding:7px 13px;font-size:13px}
-.btn-ghost{background:transparent;color:var(--slate-soft);border:1.5px solid var(--border)}
-.btn-ghost:hover{background:var(--blue-light);color:var(--blue);border-color:var(--blue-mid)}
 .btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid #fecaca}
 .btn-danger:hover{background:#fee2e2}
-.btn-full{width:100%}
 .situation-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -299,9 +297,7 @@ header{
   </div>
   <button class="gear-btn" id="gearBtn" title="Configuration">⚙️</button>
 </header>
-
 <div class="app">
-
   <div class="card config-card" id="configCard">
     <div class="card-title">Configuration du mois</div>
     <div class="field">
@@ -314,14 +310,13 @@ header{
     </div>
     <button class="btn btn-primary btn-full" id="saveConfigBtn">Enregistrer</button>
   </div>
-
   <div class="card" id="situationCard">
     <div class="card-title">Situation actuelle</div>
     <div class="situation-grid">
       <div class="stat-box accent">
         <div class="stat-label">Restant / Initial (DH)</div>
         <div class="stat-value" id="statBalance">—</div>
-        <div class="stat-sub" id="statBalanceSub">—</div>
+        <div class="stat-sub" id="statBalanceSub">Non configuré</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Jours (Restants / Total)</div>
@@ -344,7 +339,6 @@ header{
       </div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">Ajouter une dépense</div>
     <div class="input-row" style="margin-bottom:12px">
@@ -359,7 +353,6 @@ header{
     </div>
     <button class="btn btn-primary btn-full" id="addEntryBtn">+ Ajouter</button>
   </div>
-
   <div class="card" id="historyCard">
     <div class="card-title">Historique <span class="pill" id="historyCount">0</span></div>
     <ul class="history-list" id="historyList">
@@ -370,31 +363,19 @@ header{
       <button class="btn btn-danger btn-full btn-sm" id="closeMonthBtn">🔒 Clôturer le mois</button>
     </div>
   </div>
-
   <div class="card" id="archivesCard">
     <div class="card-title">Archives</div>
     <ul class="archive-list" id="archiveList">
       <li class="empty-state">Aucun mois clôturé.</li>
     </ul>
   </div>
-
 </div>
-
 <script>
-const SW_CODE = `
-self.addEventListener('install',e=>e.waitUntil(caches.open('gasoil-v1').then(c=>c.addAll(['/']))));
-self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
-`;
-
 if('serviceWorker' in navigator){
-  const blob = new Blob([SW_CODE],{type:'application/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-
 const LS_DATA = 'gasoilData';
 const LS_ARCH = 'gasoilArchives';
-
 function loadData(){
   try{return JSON.parse(localStorage.getItem(LS_DATA))||null}catch{return null}
 }
@@ -403,26 +384,21 @@ function loadArchives(){
 }
 function saveData(d){localStorage.setItem(LS_DATA,JSON.stringify(d))}
 function saveArchives(a){localStorage.setItem(LS_ARCH,JSON.stringify(a))}
-
 let data = loadData() || {initial:0,balance:0,totalDays:0,remainingDays:0,history:[]};
 let archives = loadArchives();
-
 function todayISO(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-
 function formatDate(iso){
   if(!iso)return '';
   const [y,m,d]=iso.split('-');
   return new Date(y,m-1,d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 }
-
 function fmt(n){return Number(n).toFixed(2)}
-
 function renderSituation(){
   const {initial,balance,totalDays,remainingDays} = data;
-  document.getElementById('statBalance').textContent = initial>0 ? fmt(balance)+' DH' : '—';
+  document.getElementById('statBalance').textContent = initial>0 ? fmt(balance) : '—';
   document.getElementById('statBalanceSub').textContent = initial>0 ? '/ '+fmt(initial)+' DH' : 'Non configuré';
   document.getElementById('statDays').textContent = initial>0 ? remainingDays+' / '+totalDays : '—';
   const spent = initial - balance;
@@ -442,7 +418,6 @@ function renderSituation(){
     allowedEl.className = 'stat-value';
   }
 }
-
 function renderHistory(){
   const list = document.getElementById('historyList');
   document.getElementById('historyCount').textContent = data.history.length;
@@ -464,7 +439,6 @@ function renderHistory(){
     btn.addEventListener('click',()=>editEntry(Number(btn.dataset.index)));
   });
 }
-
 function renderArchives(){
   const list = document.getElementById('archiveList');
   if(!archives.length){
@@ -505,13 +479,11 @@ function renderArchives(){
     });
   });
 }
-
 function render(){
   renderSituation();
   renderHistory();
   renderArchives();
 }
-
 document.getElementById('gearBtn').addEventListener('click',()=>{
   const card = document.getElementById('configCard');
   const open = card.classList.toggle('open');
@@ -520,23 +492,21 @@ document.getElementById('gearBtn').addEventListener('click',()=>{
     document.getElementById('cfgDays').value = data.totalDays||'';
   }
 });
-
 document.getElementById('saveConfigBtn').addEventListener('click',()=>{
   const initial = parseFloat(document.getElementById('cfgInitial').value)||0;
   const days = parseInt(document.getElementById('cfgDays').value)||0;
   if(initial<=0||days<=0){alert('Veuillez saisir des valeurs valides.');return;}
-  const spent = data.initial>0 ? data.initial - data.balance : 0;
   data.initial = initial;
   data.totalDays = days;
-  data.balance = initial - spent;
-  data.remainingDays = days - data.history.length;
+  let totalSpent = 0;
+  data.history.forEach(h => totalSpent += h.amount);
+  data.balance = initial - totalSpent;
+  data.remainingDays = Math.max(0, days - data.history.length);
   saveData(data);
   render();
   document.getElementById('configCard').classList.remove('open');
 });
-
 document.getElementById('entryDate').value = todayISO();
-
 document.getElementById('addEntryBtn').addEventListener('click',()=>{
   const amount = parseFloat(document.getElementById('entryAmount').value);
   const date = document.getElementById('entryDate').value;
@@ -545,13 +515,12 @@ document.getElementById('addEntryBtn').addEventListener('click',()=>{
   if(data.initial===0){alert('Configurez d\'abord un budget via ⚙️.');return;}
   data.history.push({amount,date});
   data.balance = data.balance - amount;
-  data.remainingDays = Math.max(0, data.remainingDays - 1);
+  data.remainingDays = Math.max(0, data.totalDays - data.history.length);
   saveData(data);
   render();
   document.getElementById('entryAmount').value = '';
   document.getElementById('entryDate').value = todayISO();
 });
-
 function editEntry(index){
   const entry = data.history[index];
   const newAmountStr = prompt('Nouveau montant (DH) :', fmt(entry.amount));
@@ -566,13 +535,14 @@ function editEntry(index){
     const [d,m,y]=parts;
     if(d&&m&&y) newDate = y.padStart(4,'0')+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0');
   }
-  const oldAmount = entry.amount;
   data.history[index] = {amount:newAmount, date:newDate};
-  data.balance = data.balance + oldAmount - newAmount;
+  let totalSpent = 0;
+  data.history.forEach(h => totalSpent += h.amount);
+  data.balance = data.initial - totalSpent;
+  data.remainingDays = Math.max(0, data.totalDays - data.history.length);
   saveData(data);
   render();
 }
-
 document.getElementById('closeMonthBtn').addEventListener('click',()=>{
   if(!data.initial){alert('Aucune donnée à clôturer.');return;}
   const name = prompt('Nom du mois (ex: Juillet 2026) :');
@@ -589,8 +559,8 @@ document.getElementById('closeMonthBtn').addEventListener('click',()=>{
   saveData(data);
   render();
 });
-
 render();
 </script>
 </body>
-  </html>
+        </html>
+  
