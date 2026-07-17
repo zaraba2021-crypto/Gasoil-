@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Gasoil">
+<link rel="manifest" href="manifest.json">
 <title>Gasoil</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -214,7 +215,12 @@ header{
 .history-info{flex:1;min-width:0}
 .history-date{font-size:12px;color:var(--slate-soft)}
 .history-amount{font-size:15px;font-weight:600;color:var(--slate)}
-.edit-btn{
+.action-btns{
+  display:flex;
+  gap:4px;
+  flex-shrink:0;
+}
+.edit-btn, .delete-btn{
   background:none;
   border:none;
   font-size:16px;
@@ -222,9 +228,9 @@ header{
   padding:4px 6px;
   border-radius:6px;
   transition:background .12s;
-  flex-shrink:0;
 }
 .edit-btn:hover{background:var(--blue-light)}
+.delete-btn:hover{background:var(--red-bg)}
 .empty-state{
   text-align:center;
   padding:24px 0 8px;
@@ -396,6 +402,14 @@ function formatDate(iso){
   return new Date(y,m-1,d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 }
 function fmt(n){return Number(n).toFixed(2)}
+function updateRemainingDays(){
+  if(data.history.length === 0){
+    data.remainingDays = data.totalDays;
+    return;
+  }
+  const uniqueDays = new Set(data.history.map(h => h.date)).size;
+  data.remainingDays = Math.max(0, data.totalDays - uniqueDays);
+}
 function renderSituation(){
   const {initial,balance,totalDays,remainingDays} = data;
   document.getElementById('statBalance').textContent = initial>0 ? fmt(balance) : '—';
@@ -432,11 +446,17 @@ function renderHistory(){
         <div class="history-date">${formatDate(e.date)}</div>
         <div class="history-amount">${fmt(e.amount)} DH</div>
       </div>
-      <button class="edit-btn" data-index="${i}" title="Modifier">✏️</button>
+      <div class="action-btns">
+        <button class="edit-btn" data-index="${i}" title="Modifier">✏️</button>
+        <button class="delete-btn" data-index="${i}" title="Supprimer">🗑️</button>
+      </div>
     </li>
   `).join('');
   list.querySelectorAll('.edit-btn').forEach(btn=>{
     btn.addEventListener('click',()=>editEntry(Number(btn.dataset.index)));
+  });
+  list.querySelectorAll('.delete-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>deleteEntry(Number(btn.dataset.index)));
   });
 }
 function renderArchives(){
@@ -501,7 +521,7 @@ document.getElementById('saveConfigBtn').addEventListener('click',()=>{
   let totalSpent = 0;
   data.history.forEach(h => totalSpent += h.amount);
   data.balance = initial - totalSpent;
-  data.remainingDays = Math.max(0, days - data.history.length);
+  updateRemainingDays();
   saveData(data);
   render();
   document.getElementById('configCard').classList.remove('open');
@@ -515,7 +535,7 @@ document.getElementById('addEntryBtn').addEventListener('click',()=>{
   if(data.initial===0){alert('Configurez d\'abord un budget via ⚙️.');return;}
   data.history.push({amount,date});
   data.balance = data.balance - amount;
-  data.remainingDays = Math.max(0, data.totalDays - data.history.length);
+  updateRemainingDays();
   saveData(data);
   render();
   document.getElementById('entryAmount').value = '';
@@ -539,12 +559,23 @@ function editEntry(index){
   let totalSpent = 0;
   data.history.forEach(h => totalSpent += h.amount);
   data.balance = data.initial - totalSpent;
-  data.remainingDays = Math.max(0, data.totalDays - data.history.length);
+  updateRemainingDays();
+  saveData(data);
+  render();
+}
+function deleteEntry(index){
+  if(!confirm('Voulez-vous vraiment supprimer cette dépense ?')) return;
+  data.history.splice(index, 1);
+  let totalSpent = 0;
+  data.history.forEach(h => totalSpent += h.amount);
+  data.balance = data.initial - totalSpent;
+  updateRemainingDays();
   saveData(data);
   render();
 }
 document.getElementById('closeMonthBtn').addEventListener('click',()=>{
   if(!data.initial){alert('Aucune donnée à clôturer.');return;}
+  if(!confirm('Voulez-vous vraiment clôturer ce mois ? Cette action videra la situation actuelle.')) return;
   const name = prompt('Nom du mois (ex: Juillet 2026) :');
   if(!name||!name.trim())return;
   archives.unshift({
@@ -562,5 +593,5 @@ document.getElementById('closeMonthBtn').addEventListener('click',()=>{
 render();
 </script>
 </body>
-        </html>
+  </html>
   
