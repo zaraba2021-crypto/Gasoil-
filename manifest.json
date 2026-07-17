@@ -10,7 +10,7 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "app-icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
