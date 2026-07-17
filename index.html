@@ -3,454 +3,577 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gasoil</title>
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2563eb">
+<meta name="description" content="Gérez votre budget carburant mensuel">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gasoil">
+<title>Gasoil</title>
 <style>
-*{
-box-sizing:border-box;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;
+  --blue-light:#eff6ff;
+  --blue-mid:#bfdbfe;
+  --slate:#0f172a;
+  --slate-mid:#334155;
+  --slate-soft:#64748b;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --border:#e2e8f0;
+  --green:#16a34a;
+  --green-bg:#f0fdf4;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --yellow:#d97706;
+  --radius:14px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
 }
 body{
-margin:0;
-padding:24px 16px;
-background:#f8fafc;
-color:#1e293b;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--slate);
+  min-height:100vh;
+  padding:0 0 40px;
 }
-.container{
-max-width:450px;
-margin:auto;
+.app{
+  max-width:450px;
+  margin:0 auto;
+  padding:0 16px;
 }
-.header-wrapper{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:4px;
-position:relative;
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 16px 12px;
+  max-width:450px;
+  margin:0 auto;
 }
-h1{
-margin:0;
-color:#2563eb;
-font-size:28px;
-font-weight:800;
-flex-grow:1;
-text-align:center;
-padding-left:32px;
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
-.btn-config{
-background:none;
-border:0;
-font-size:22px;
-cursor:pointer;
-padding:4px;
-border-radius:8px;
-transition:background 0.2s;
+.logo-icon{
+  width:36px;
+  height:36px;
+  background:var(--blue);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
 }
-.btn-config:hover{
-background:#e2e8f0;
+.logo-text{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:-0.5px;
+  color:var(--slate);
 }
-.subtitle{
-text-align:center;
-color:#64748b;
-margin-bottom:24px;
-font-size:14px;
+.logo-text span{
+  color:var(--blue);
 }
+.gear-btn{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  width:38px;
+  height:38px;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:var(--shadow);
+  transition:background .15s,transform .15s;
+}
+.gear-btn:hover{background:var(--blue-light);transform:rotate(30deg)}
 .card{
-background:white;
-padding:20px;
-border-radius:16px;
-margin-bottom:16px;
-border:1px solid #e2e8f0;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:20px;
+  margin-bottom:14px;
+  border:1px solid var(--border);
 }
-.config-card{
-display:none;
-animation:fadeIn 0.3s ease;
+.card-title{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  color:var(--slate-soft);
+  margin-bottom:16px;
 }
-@keyframes fadeIn {
-from { opacity:0; transform:translateY(-10px); }
-to { opacity:1; transform:translateY(0); }
+.config-card{display:none}
+.config-card.open{display:block}
+.field{margin-bottom:14px}
+.field label{
+  display:block;
+  font-size:13px;
+  font-weight:500;
+  color:var(--slate-mid);
+  margin-bottom:6px;
 }
-h2{
-font-size:16px;
-font-weight:700;
-color:#0f172a;
-margin-top:0;
-margin-bottom:16px;
-text-transform:uppercase;
-letter-spacing:0.5px;
+.field input{
+  width:100%;
+  padding:10px 12px;
+  border:1.5px solid var(--border);
+  border-radius:9px;
+  font-size:15px;
+  color:var(--slate);
+  background:var(--bg);
+  transition:border-color .15s,box-shadow .15s;
+  outline:none;
 }
-input{
-width:100%;
-padding:12px 14px;
-margin:8px 0 12px 0;
-border-radius:10px;
-border:1px solid #cbd5e1;
-font-size:15px;
-color:#1e293b;
-outline:none;
-transition:border-color 0.2s;
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:10px 18px;
+  border-radius:9px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+  transition:background .15s,transform .1s,box-shadow .15s;
 }
-input:focus{
-border-color:#2563eb;
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#1d4ed8;box-shadow:0 2px 8px rgba(37,99,235,.35)}
+.btn-sm{padding:7px 13px;font-size:13px}
+.btn-ghost{background:transparent;color:var(--slate-soft);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--blue-light);color:var(--blue);border-color:var(--blue-mid)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid #fecaca}
+.btn-danger:hover{background:#fee2e2}
+.btn-full{width:100%}
+.situation-grid{
+  display:block;
 }
-button{
-width:100%;
-padding:13px;
-border:0;
-border-radius:10px;
-background:#2563eb;
-color:white;
-font-size:15px;
-font-weight:600;
-cursor:pointer;
-transition:background 0.2s;
+.stat-box{
+  background:var(--bg);
+  border-radius:10px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  margin-bottom:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-button:hover{
-background:#1d4ed8;
+.stat-box.wide{
+  display:flex;
 }
-.btn-secondary{
-background:#64748b;
-margin-top:12px;
-}
-.btn-secondary:hover{
-background:#475569;
-}
-.stat-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:8px 0;
-border-bottom:1px solid #f1f5f9;
-}
-.stat-row:last-of-type{
-border-bottom:0;
+.stat-box.accent{
+  background:var(--blue-light);
+  border-color:var(--blue-mid);
 }
 .stat-label{
-color:#64748b;
-font-size:14px;
+  font-size:13px;
+  color:var(--slate-soft);
+  font-weight:500;
+  line-height:1.3;
+}
+.stat-details{
+  text-align:right;
 }
 .stat-value{
-font-weight:600;
-color:#0f172a;
-font-size:15px;
+  font-size:16px;
+  font-weight:700;
+  color:var(--slate);
+  letter-spacing:-0.3px;
 }
-.green-val{
-color:#16a34a !important;
-font-weight:700;
+.stat-box.accent .stat-value{color:var(--blue)}
+.stat-sub{
+  font-size:11px;
+  color:var(--slate-soft);
+  margin-top:2px;
 }
-.red-val{
-color:#dc2626 !important;
-font-weight:700;
+.stat-value.green{color:var(--green)}
+.stat-value.red{color:var(--red)}
+.input-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
 }
-li{
-list-style:none;
-padding:12px 0;
-border-bottom:1px solid #f1f5f9;
-display:flex;
-justify-content:space-between;
-align-items:center;
+.input-row .field{flex:1;margin-bottom:0}
+.history-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.history-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:var(--bg);
+  border-radius:9px;
+  border:1px solid var(--border);
 }
-li:last-child{
-border-bottom:0;
+.day-badge{
+  background:var(--blue);
+  color:#fff;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+  padding:3px 7px;
+  min-width:32px;
+  text-align:center;
+  flex-shrink:0;
 }
-.hist-info{
-display:flex;
-flex-direction:column;
-gap:2px;
+.history-info{flex:1;min-width:0}
+.history-date{font-size:12px;color:var(--slate-soft)}
+.history-amount{font-size:15px;font-weight:600;color:var(--slate)}
+.edit-btn{
+  background:none;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+  padding:4px 6px;
+  border-radius:6px;
+  transition:background .12s;
+  flex-shrink:0;
 }
-.hist-title{
-font-size:14px;
-font-weight:600;
-color:#334155;
+.edit-btn:hover{background:var(--blue-light)}
+.empty-state{
+  text-align:center;
+  padding:24px 0 8px;
+  color:var(--slate-soft);
+  font-size:14px;
 }
-.hist-right{
-display:flex;
-align-items:center;
-gap:12px;
-}
-.hist-amount{
-font-weight:700;
-color:#0f172a;
-font-size:15px;
-}
-.btn-edit{
-background:none;
-border:0;
-color:#f97316;
-cursor:pointer;
-font-size:16px;
-padding:4px 8px;
-width:auto;
-margin:0;
-border-radius:6px;
-}
-.btn-edit:hover{
-background:#fff7ed;
-}
-.small{
-font-size:12px;
-color:#94a3b8;
-}
-#history{
-margin:0;
-padding:0;
-}
+.archive-list{list-style:none;display:flex;flex-direction:column;gap:8px}
 .archive-item{
-padding:10px 0;
-border-bottom:1px solid #f1f5f9;
-cursor:pointer;
-}
-.archive-item:last-child{
-border-bottom:0;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
 }
 .archive-header{
-display:flex;
-justify-content:space-between;
-font-weight:600;
-color:#334155;
-font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 14px;
+  background:var(--bg);
+  cursor:pointer;
+  user-select:none;
 }
-.archive-details{
-display:none;
-background:#f8fafc;
-padding:10px;
-border-radius:8px;
-margin-top:8px;
-font-size:13px;
-color:#475569;
+.archive-header:hover{background:var(--blue-light)}
+.archive-name{font-weight:600;font-size:14px}
+.archive-toggle{font-size:12px;color:var(--slate-soft)}
+.archive-detail{
+  display:none;
+  padding:12px 14px;
+  border-top:1px solid var(--border);
+  background:var(--card);
 }
-.archive-details ul{
-margin:8px 0 0 0;
-padding:0;
+.archive-detail.open{display:block}
+.archive-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:12px;
 }
-.archive-details li{
-padding:6px 0;
+.archive-stat{font-size:13px;color:var(--slate-mid)}
+.archive-stat strong{display:block;font-size:15px;color:var(--slate);font-weight:700}
+.archive-entries{list-style:none;display:flex;flex-direction:column;gap:6px}
+.archive-entry{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13px;
+  padding:6px 10px;
+  background:var(--bg);
+  border-radius:7px;
+  border:1px solid var(--border);
+}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.close-month-wrap{margin-top:4px}
+.pill{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:20px;
+  background:var(--blue-light);
+  color:var(--blue);
+  margin-left:6px;
 }
 </style>
 </head>
 <body>
-<div class="container">
-<div class="header-wrapper">
-<h1>⛽ Gasoil</h1>
-<button class="btn-config" onclick="toggleConfig()">⚙️</button>
-</div>
-<div class="subtitle">Gestion quotidienne des dépenses</div>
-<div class="card config-card" id="configCard">
-<h2>Configuration du mois</h2>
-<input id="initial" type="number" placeholder="Montant initial (DH)">
-<input id="days" type="number" placeholder="Nombre de jours">
-<button onclick="startMonth()">Démarrer le mois</button>
-</div>
-<div class="card">
-<h2>Situation</h2>
-<div class="stat-row">
-<span class="stat-label">Restant / Initial</span>
-<span class="stat-value" id="budgetSplit">0.00 / 0.00 DH</span>
-</div>
-<div class="stat-row">
-<span class="stat-label">Jours (Restants / Total)</span>
-<span class="stat-value" id="daysSplit">0 / 0 jours</span>
-</div>
-<div class="stat-row">
-<span class="stat-label">Total dépensé</span>
-<span class="stat-value" id="spent">0.00 DH</span>
-</div>
-<div class="stat-row">
-<span class="stat-label">Dépense moyenne (prévue)</span>
-<span class="stat-value" id="average">0.00 DH</span>
-</div>
-<div class="stat-row">
-<span class="stat-label">Dépense autorisée / jour</span>
-<span class="stat-value" id="daily">0.00 DH</span>
-</div>
-<button class="btn-secondary" onclick="closeMonth()">Clôturer le mois</button>
-</div>
-<div class="card">
-<h2>Dépense du jour</h2>
-<input id="expense" type="number" placeholder="Montant dépensé">
-<input id="expenseDate" type="date">
-<button onclick="addExpense()">Ajouter aujourd'hui</button>
-</div>
-<div class="card">
-<h2>Historique</h2>
-<ul id="history"></ul>
-</div>
-<div class="card">
-<h2>Archives des mois</h2>
-<div id="archivesList"></div>
-</div>
+<header>
+  <div class="logo">
+    <div class="logo-icon">⛽</div>
+    <div class="logo-text">Gas<span>oil</span></div>
+  </div>
+  <button class="gear-btn" id="gearBtn" title="Configuration">⚙️</button>
+</header>
+<div class="app">
+  <div class="card config-card" id="configCard">
+    <div class="card-title">Configuration du mois</div>
+    <div class="field">
+      <label>Montant initial (DH)</label>
+      <input type="number" id="cfgInitial" placeholder="ex: 800" min="0" step="0.01">
+    </div>
+    <div class="field">
+      <label>Nombre de jours</label>
+      <input type="number" id="cfgDays" placeholder="ex: 26" min="1">
+    </div>
+    <button class="btn btn-primary btn-full" id="saveConfigBtn">Enregistrer</button>
+  </div>
+  <div class="card" id="situationCard">
+    <div class="card-title">Situation actuelle</div>
+    <div class="situation-grid">
+      <div class="stat-box accent">
+        <span class="stat-label">Restant / Initial (DH)</span>
+        <div class="stat-details">
+          <div class="stat-value" id="statBalance">—</div>
+          <div class="stat-sub" id="statBalanceSub">—</div>
+        </div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Jours (Restants / Total)</span>
+        <div class="stat-details">
+          <div class="stat-value" id="statDays">—</div>
+        </div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Total dépensé</span>
+        <div class="stat-details">
+          <div class="stat-value" id="statSpent">—</div>
+        </div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Dép. moy. prévue / j</span>
+        <div class="stat-details">
+          <div class="stat-value" id="statAvg">—</div>
+        </div>
+      </div>
+      <div class="stat-box wide">
+        <span class="stat-label">Dépense autorisée / jour</span>
+        <div class="stat-details">
+          <div class="stat-value" id="statAllowed">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Ajouter une dépense</div>
+    <div class="input-row" style="margin-bottom:12px">
+      <div class="field">
+        <label>Montant dépensé (DH)</label>
+        <input type="number" id="entryAmount" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="entryDate">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" id="addEntryBtn">+ Ajouter</button>
+  </div>
+  <div class="card" id="historyCard">
+    <div class="card-title">Historique <span class="pill" id="historyCount">0</span></div>
+    <ul class="history-list" id="historyList">
+      <li class="empty-state">Aucune dépense ce mois.</li>
+    </ul>
+    <div class="divider"></div>
+    <div class="close-month-wrap">
+      <button class="btn btn-danger btn-full btn-sm" id="closeMonthBtn">🔒 Clôturer le mois</button>
+    </div>
+  </div>
+  <div class="card" id="archivesCard">
+    <div class="card-title">Archives</div>
+    <ul class="archive-list" id="archiveList">
+      <li class="empty-state">Aucun mois clôturé.</li>
+    </ul>
+  </div>
 </div>
 <script>
-if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("sw.js");
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
-
-let data = JSON.parse(localStorage.getItem("gasoilData")) || {
-    initial: 0,
-    balance: 0,
-    days: 0,
-    totalDays: 0,
-    history: []
-};
-let archives = JSON.parse(localStorage.getItem("gasoilArchives")) || [];
-
-function save(){
-    localStorage.setItem("gasoilData", JSON.stringify(data));
-    localStorage.setItem("gasoilArchives", JSON.stringify(archives));
+const LS_DATA = 'gasoilData';
+const LS_ARCH = 'gasoilArchives';
+function loadData(){
+  try{return JSON.parse(localStorage.getItem(LS_DATA))||null}catch{return null}
 }
-function setDefaultDate(){
-    let today = new Date().toISOString().split('T')[0];
-    document.getElementById("expenseDate").value = today;
+function loadArchives(){
+  try{return JSON.parse(localStorage.getItem(LS_ARCH))||[]}catch{return []}
 }
-function toggleConfig(){
-    let card = document.getElementById("configCard");
-    card.style.display = card.style.display === "block" ? "none" : "block";
+function saveData(d){localStorage.setItem(LS_DATA,JSON.stringify(d))}
+function saveArchives(a){localStorage.setItem(LS_ARCH,JSON.stringify(a))}
+let data = loadData() || {initial:0,balance:0,totalDays:0,remainingDays:0,history:[]};
+let archives = loadArchives();
+function todayISO(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-function update(){
-    let spent = data.initial - data.balance;
-    document.getElementById("budgetSplit").innerHTML = data.balance.toFixed(2) + " / " + data.initial.toFixed(2) + " DH";
-    document.getElementById("daysSplit").innerHTML = data.days + " / " + data.totalDays + " jours";
-    document.getElementById("spent").innerHTML = spent.toFixed(2) + " DH";
-    let average = data.totalDays > 0 ? data.initial / data.totalDays : 0;
-    document.getElementById("average").innerHTML = average.toFixed(2) + " DH";
-    let daily = data.days > 0 ? data.balance / data.days : 0;
-    document.getElementById("daily").innerHTML = daily.toFixed(2) + " DH";
-    let dailyVal = document.getElementById("daily");
-    if(daily < average){
-        dailyVal.className = "stat-value red-val";
-    } else {
-        dailyVal.className = "stat-value green-val";
-    }
-    let html = "";
-    data.history.forEach((item, index) => {
-        html += `
-        <li>
-        <div class="hist-info">
-        <span class="hist-title">Jour ${index + 1}</span>
-        <span class="small">${item.date}</span>
-        </div>
-        <div class="hist-right">
-        <span class="hist-amount">${item.amount.toFixed(2)} DH</span>
-        <button class="btn-edit" onclick="editDay(${index})">✏️</button>
-        </div>
-        </li>
-        `;
-    });
-    document.getElementById("history").innerHTML = html;
-    renderArchives();
+function formatDate(iso){
+  if(!iso)return '';
+  const [y,m,d]=iso.split('-');
+  return new Date(y,m-1,d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 }
-function startMonth(){
-    let initial = Number(document.getElementById("initial").value);
-    let days = Number(document.getElementById("days").value);
-    if(initial <= 0 || days <= 0){
-        alert("Veuillez remplir les informations");
-        return;
-    }
-    data.initial = initial;
-    data.balance = initial;
-    data.days = days;
-    data.totalDays = days;
-    data.history = [];
-    save();
-    update();
-    document.getElementById("initial").value = "";
-    document.getElementById("days").value = "";
-    document.getElementById("configCard").style.display = "none";
+function fmt(n){return Number(n).toFixed(2)}
+function renderSituation(){
+  const {initial,balance,totalDays,remainingDays} = data;
+  document.getElementById('statBalance').textContent = initial>0 ? fmt(balance)+' DH' : '—';
+  document.getElementById('statBalanceSub').textContent = initial>0 ? '/ '+fmt(initial)+' DH' : 'Non configuré';
+  document.getElementById('statDays').textContent = initial>0 ? remainingDays+' / '+totalDays : '—';
+  const spent = initial - balance;
+  document.getElementById('statSpent').textContent = initial>0 ? fmt(spent)+' DH' : '—';
+  const avg = totalDays>0 ? initial/totalDays : 0;
+  document.getElementById('statAvg').textContent = initial>0 ? fmt(avg)+' DH/j' : '—';
+  const allowed = remainingDays>0 ? balance/remainingDays : 0;
+  const allowedEl = document.getElementById('statAllowed');
+  if(initial>0 && remainingDays>0){
+    allowedEl.textContent = fmt(allowed)+' DH/j';
+    allowedEl.className = 'stat-value '+(allowed>=avg?'green':'red');
+  } else if(initial>0 && remainingDays===0){
+    allowedEl.textContent = 'Mois terminé';
+    allowedEl.className = 'stat-value';
+  } else {
+    allowedEl.textContent = '—';
+    allowedEl.className = 'stat-value';
+  }
 }
-function addExpense(){
-    let expense = Number(document.getElementById("expense").value);
-    let rawDate = document.getElementById("expenseDate").value;
-    if(expense <= 0 || !rawDate) return;
-    if(data.days <= 0){
-        alert("Le mois est terminé ou non configuré");
-        return;
-    }
-    let formattedDate = new Date(rawDate).toLocaleDateString("fr-FR");
-    data.balance -= expense;
-    data.days--;
-    data.history.push({
-        amount: expense,
-        date: formattedDate
-    });
-    save();
-    update();
-    document.getElementById("expense").value = "";
-    setDefaultDate();
-}
-function editDay(index){
-    let item = data.history[index];
-    let newAmountVal = prompt(`Modifier le montant du Jour ${index + 1}:`, item.amount);
-    if(newAmountVal === null || newAmountVal === "" || isNaN(newAmountVal)) return;
-    
-    let newDateVal = prompt(`Modifier le date (JJ/MM/AAAA):`, item.date);
-    if(newDateVal === null || newDateVal === "") return;
-
-    let newAmount = Number(newAmountVal);
-    data.balance += item.amount;
-    data.balance -= newAmount;
-    item.amount = newAmount;
-    item.date = newDateVal;
-    
-    save();
-    update();
-}
-function closeMonth(){
-    if(data.initial === 0){
-        alert("Aucun mois actif à clôturer.");
-        return;
-    }
-    let monthName = prompt("Entrez le nom du mois (ex: Juillet 2026):");
-    if(!monthName) return;
-    let spent = data.initial - data.balance;
-    let archiveMois = {
-        name: monthName,
-        initial: data.initial,
-        balance: data.balance,
-        spent: spent,
-        totalDays: data.totalDays,
-        history: [...data.history]
-    };
-    archives.push(archiveMois);
-    data = { initial: 0, balance: 0, days: 0, totalDays: 0, history: [] };
-    save();
-    update();
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  document.getElementById('historyCount').textContent = data.history.length;
+  if(!data.history.length){
+    list.innerHTML = '<li class="empty-state">Aucune dépense ce mois.</li>';
+    return;
+  }
+  list.innerHTML = data.history.map((e,i)=>`
+    <li class="history-item">
+      <span class="day-badge">J${i+1}</span>
+      <div class="history-info">
+        <div class="history-date">${formatDate(e.date)}</div>
+        <div class="history-amount">${fmt(e.amount)} DH</div>
+      </div>
+      <button class="edit-btn" data-index="${i}" title="Modifier">✏️</button>
+    </li>
+  `).join('');
+  list.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>editEntry(Number(btn.dataset.index)));
+  });
 }
 function renderArchives(){
-    let html = "";
-    if(archives.length === 0){
-        html = "<div class='small' style='text-align:center;'>Aucun mois archivé</div>";
-    }
-    archives.forEach((arch, index) => {
-        let histHtml = "";
-        arch.history.forEach((h, i) => {
-            histHtml += `<li>Jour ${i+1} (${h.date}): <b>${h.amount.toFixed(2)} DH</b></li>`;
-        });
-        html += `
-        <div class="archive-item">
-            <div class="archive-header" onclick="toggleArchiveDetails(${index})">
-                <span>📁 ${arch.name}</span>
-                <span>${arch.spent.toFixed(2)} DH</span>
-            </div>
-            <div class="archive-details" id="arch-${index}">
-                <div><b>Initial:</b> ${arch.initial.toFixed(2)} DH</div>
-                <div><b>Restant:</b> ${arch.balance.toFixed(2)} DH</div>
-                <div><b>Jours travaillés:</b> ${arch.history.length} jours</div>
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin:8px 0;">
-                <b>Détails des jours:</b>
-                <ul>${histHtml}</ul>
-            </div>
+  const list = document.getElementById('archiveList');
+  if(!archives.length){
+    list.innerHTML = '<li class="empty-state">Aucun mois clôturé.</li>';
+    return;
+  }
+  list.innerHTML = archives.map((arch,i)=>`
+    <li class="archive-item">
+      <div class="archive-header" data-arch="${i}">
+        <span class="archive-name">📅 ${arch.name}</span>
+        <span class="archive-toggle" id="atoggle-${i}">▼</span>
+      </div>
+      <div class="archive-detail" id="adetail-${i}">
+        <div class="archive-stats">
+          <div class="archive-stat"><strong>${fmt(arch.initial)} DH</strong>Budget initial</div>
+          <div class="archive-stat"><strong>${fmt(arch.balance)} DH</strong>Restant</div>
+          <div class="archive-stat"><strong>${arch.totalDays} j</strong>Total jours</div>
+          <div class="archive-stat"><strong>${arch.history.length} j</strong>Jours travaillés</div>
         </div>
-        `;
+        <ul class="archive-entries">
+          ${arch.history.map((e,j)=>`
+            <li class="archive-entry">
+              <span style="color:var(--slate-soft);font-size:12px">J${j+1} · ${formatDate(e.date)}</span>
+              <span style="font-weight:600">${fmt(e.amount)} DH</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    </li>
+  `).join('');
+  list.querySelectorAll('.archive-header').forEach(hdr=>{
+    hdr.addEventListener('click',()=>{
+      const i = hdr.dataset.arch;
+      const detail = document.getElementById('adetail-'+i);
+      const toggle = document.getElementById('atoggle-'+i);
+      const open = detail.classList.toggle('open');
+      toggle.textContent = open ? '▲' : '▼';
     });
-    document.getElementById("archivesList").innerHTML = html;
+  });
 }
-function toggleArchiveDetails(index){
-    let el = document.getElementById("arch-" + index);
-    el.style.display = el.style.display === "block" ? "none" : "block";
+function render(){
+  renderSituation();
+  renderHistory();
+  renderArchives();
 }
-setDefaultDate();
-update();
+document.getElementById('gearBtn').addEventListener('click',()=>{
+  const card = document.getElementById('configCard');
+  const open = card.classList.toggle('open');
+  if(open){
+    document.getElementById('cfgInitial').value = data.initial||'';
+    document.getElementById('cfgDays').value = data.totalDays||'';
+  }
+});
+document.getElementById('saveConfigBtn').addEventListener('click',()=>{
+  const initial = parseFloat(document.getElementById('cfgInitial').value)||0;
+  const days = parseInt(document.getElementById('cfgDays').value)||0;
+  if(initial<=0||days<=0){alert('Veuillez saisir des valeurs valides.');return;}
+  data.initial = initial;
+  data.totalDays = days;
+  let totalSpent = 0;
+  data.history.forEach(h => totalSpent += h.amount);
+  data.balance = initial - totalSpent;
+  data.remainingDays = Math.max(0, days - data.history.length);
+  saveData(data);
+  render();
+  document.getElementById('configCard').classList.remove('open');
+});
+document.getElementById('entryDate').value = todayISO();
+document.getElementById('addEntryBtn').addEventListener('click',()=>{
+  const amount = parseFloat(document.getElementById('entryAmount').value);
+  const date = document.getElementById('entryDate').value;
+  if(!amount||amount<=0){alert('Saisissez un montant valide.');return;}
+  if(!date){alert('Saisissez une date.');return;}
+  if(data.initial===0){alert('Configurez d\'abord un budget via ⚙️.');return;}
+  data.history.push({amount,date});
+  data.balance = data.balance - amount;
+  data.remainingDays = Math.max(0, data.totalDays - data.history.length);
+  saveData(data);
+  render();
+  document.getElementById('entryAmount').value = '';
+  document.getElementById('entryDate').value = todayISO();
+});
+function editEntry(index){
+  const entry = data.history[index];
+  const newAmountStr = prompt('Nouveau montant (DH) :', fmt(entry.amount));
+  if(newAmountStr===null)return;
+  const newAmount = parseFloat(newAmountStr);
+  if(isNaN(newAmount)||newAmount<0){alert('Montant invalide.');return;}
+  const newDateStr = prompt('Nouvelle date (JJ/MM/AAAA) :', entry.date ? entry.date.split('-').reverse().join('/') : '');
+  if(newDateStr===null)return;
+  let newDate = entry.date;
+  const parts = newDateStr.split('/');
+  if(parts.length===3){
+    const [d,m,y]=parts;
+    if(d&&m&&y) newDate = y.padStart(4,'0')+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0');
+  }
+  const oldAmount = entry.amount;
+  data.history[index] = {amount:newAmount, date:newDate};
+  data.balance = data.balance + oldAmount - newAmount;
+  data.remainingDays = Math.max(0, data.totalDays - data.history.length);
+  saveData(data);
+  render();
+}
+document.getElementById('closeMonthBtn').addEventListener('click',()=>{
+  if(!data.initial){alert('Aucune donnée à clôturer.');return;}
+  const name = prompt('Nom du mois (ex: Juillet 2026) :');
+  if(!name||!name.trim())return;
+  archives.unshift({
+    name:name.trim(),
+    initial:data.initial,
+    balance:data.balance,
+    totalDays:data.totalDays,
+    history:[...data.history]
+  });
+  saveArchives(archives);
+  data = {initial:0,balance:0,totalDays:0,remainingDays:0,history:[]};
+  saveData(data);
+  render();
+});
+render();
 </script>
 </body>
-                                                     </html>
-                                                     
+        </html>
+    
